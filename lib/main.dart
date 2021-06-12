@@ -1,5 +1,8 @@
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:faller/creds.dart';
+import 'package:faller/utils/fcm_push.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -19,6 +22,8 @@ class _FallerAppState extends State<FallerApp> {
   bool _joined = false;
   int _remoteUid = 0;
   bool _switch = false;
+  var _messaging;
+  String message = 'Please chat';
 
   @override
   void initState() {
@@ -30,6 +35,14 @@ class _FallerAppState extends State<FallerApp> {
   Future<void> initPlatformState() async {
     // Get microphone permission
     await [Permission.microphone].request();
+    await Firebase.initializeApp();
+    _messaging = FirebaseMessaging.instance;
+    _messaging.subscribeToTopic('faller');
+    FirebaseMessaging.onMessage.listen((event) {
+      setState(() {
+        message = "Notification received";
+      });
+    });
 
     // Create RTC client instance
     RtcEngineConfig config = RtcEngineConfig(Credentials.APP_ID);
@@ -38,17 +51,17 @@ class _FallerAppState extends State<FallerApp> {
     // Define event handling logic
     engine.setEventHandler(RtcEngineEventHandler(
         joinChannelSuccess: (String channel, int uid, int elapsed) {
-      print('joinChannelSuccess ${channel} ${uid}');
+      print('joinChannelSuccess $channel $uid');
       setState(() {
         _joined = true;
       });
     }, userJoined: (int uid, int elapsed) {
-      print('userJoined ${uid}');
+      print('userJoined $uid');
       setState(() {
         _remoteUid = uid;
       });
     }, userOffline: (int uid, UserOfflineReason reason) {
-      print('userOffline ${uid}');
+      print('userOffline $uid');
       setState(() {
         _remoteUid = 0;
       });
@@ -63,11 +76,22 @@ class _FallerAppState extends State<FallerApp> {
     return MaterialApp(
       title: 'Agora Audio quickstart',
       home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(
+            Icons.message_outlined,
+          ),
+          onPressed: () async {
+            bool sent = await FcmPush.postRequest();
+            setState(() {
+              message += sent.toString();
+            });
+          },
+        ),
         appBar: AppBar(
           title: Text('Agora Audio quickstart'),
         ),
         body: Center(
-          child: Text('Please chatssss!'),
+          child: Text(message),
         ),
       ),
     );
