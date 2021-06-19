@@ -4,6 +4,7 @@ import 'package:faller/home/home_viewmodel.dart';
 import 'package:faller/utils/animations/orbit_painter.dart';
 import 'package:faller/utils/widgets/circular_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stacked/stacked.dart';
 import 'dart:math';
 
@@ -57,6 +58,8 @@ class _HomeViewState extends State<HomeView>
     return pos!.position;
   }
 
+  bool isOpen = false;
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeViewModel>.reactive(
@@ -89,7 +92,29 @@ class _HomeViewState extends State<HomeView>
                           ),
                         ),
                         Positioned(
-                          child: CircularImage(40),
+                          child: PortalEntry(
+                              visible: isOpen,
+                              portalAnchor: Alignment.bottomCenter,
+                              childAnchor: Alignment.topCenter,
+                              portal: Material(
+                                child: Container(
+                                  color: Colors.blue,
+                                  width: 120,
+                                  height: 120,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    child: Text("Here Here"),
+                                  ),
+                                ),
+                              ),
+                              child: GestureDetector(
+                                onTap: () => setState(() {
+                                  isOpen = !isOpen;
+                                  print(isOpen);
+                                }),
+                                child: CircularImage(40),
+                              )),
                           top: calculate(_animation.value).dy,
                           left: calculate(_animation.value).dx,
                         )

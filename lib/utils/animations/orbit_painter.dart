@@ -20,7 +20,7 @@ class OrbitPainter extends CustomPainter {
         center: Offset(size.width / 2, size.height / 2), radius: radius);
 
     // draw the three arcs
-    canvas.drawArc(rect, 0 * pi, 1.67 * pi, false, p);
+    canvas.drawArc(rect, -0.8 * pi, 1.8 * pi, false, p);
 
     //first shape
   }
