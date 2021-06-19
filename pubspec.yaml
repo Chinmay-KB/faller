@@ -18,18 +18,13 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.11.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: "^0.7.0"
-  firebase_messaging: "^8.0.0-dev.15"
-  flutter_local_notifications: "^4.0.1+2"
-  agora_rtc_engine: any
-  permission_handler: any
-  http: any
-
+  stacked: ^2.1.9
+  stacked_services: ^0.8.7
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -39,6 +34,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  stacked_generator: ^0.4.8
+  build_runner: ^2.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -52,9 +49,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/bean.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
