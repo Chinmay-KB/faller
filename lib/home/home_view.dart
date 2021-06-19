@@ -2,11 +2,13 @@ import 'dart:ui';
 
 import 'package:faller/home/home_viewmodel.dart';
 import 'package:faller/utils/animations/orbit_painter.dart';
+import 'package:faller/utils/models/user.dart';
 import 'package:faller/utils/widgets/circular_image.dart';
+import 'package:faller/utils/widgets/orbit_widget.dart';
+import 'package:faller/utils/widgets/rotating_user_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stacked/stacked.dart';
-import 'dart:math';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -16,60 +18,12 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation _animation;
-  late Path _path;
-  late double _width;
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 5000));
-    super.initState();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
-      ..addListener(() {
-        setState(() {
-          if (_controller.isCompleted) _controller.repeat();
-        });
-      });
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Path drawPath(double radius) {
-    Path path = Path();
-    final Rect rect = Rect.fromCircle(
-        center: Offset((_width - radius / 2) / 2, (_width - radius / 2) / 2),
-        radius: radius);
-    path.addOval(rect);
-    return path;
-  }
-
-  Offset calculate(value) {
-    PathMetrics pathMetrics = _path.computeMetrics();
-    PathMetric pathMetric = pathMetrics.elementAt(0);
-    value = pathMetric.length * value;
-    Tangent? pos = pathMetric.getTangentForOffset(value);
-    return pos!.position;
-  }
-
-  bool isOpen = false;
-
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeViewModel>.reactive(
       viewModelBuilder: () => HomeViewModel(),
-      onModelReady: (model) {
-        _width = MediaQuery.of(context).size.width;
-        _path = drawPath(100);
-
-        model.init();
-      },
+      onModelReady: (model) => model.init(
+          width: MediaQuery.of(context).size.width, tickerProvider: this),
       builder: (
         BuildContext context,
         HomeViewModel model,
@@ -80,48 +34,35 @@ class _HomeViewState extends State<HomeView>
                 ? Center(child: CircularProgressIndicator())
                 : Center(
                     child: Container(
-                    height: MediaQuery.of(context).size.width,
-                    width: MediaQuery.of(context).size.width,
+                    height: model.width,
+                    width: model.width,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Transform.rotate(
-                          angle: 2 * pi * _animation.value,
-                          child: CustomPaint(
-                            painter: OrbitPainter(radius: 100),
-                          ),
-                        ),
-                        Positioned(
-                          child: PortalEntry(
-                              visible: isOpen,
-                              portalAnchor: Alignment.bottomCenter,
-                              childAnchor: Alignment.topCenter,
-                              portal: Material(
-                                child: Container(
-                                  color: Colors.blue,
-                                  width: 120,
-                                  height: 120,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: Text("Here Here"),
-                                  ),
-                                ),
-                              ),
-                              child: GestureDetector(
-                                onTap: () => setState(() {
-                                  isOpen = !isOpen;
-                                  print(isOpen);
-                                }),
-                                child: CircularImage(40),
-                              )),
-                          top: calculate(_animation.value).dy,
-                          left: calculate(_animation.value).dx,
-                        )
+                        ...orbitWidgets(model.animationValue),
+                        ...planets(model)
                       ],
                     ),
                   )));
       },
     );
+  }
+
+  List<OrbitWidget> orbitWidgets(double animationValue) {
+    return List.generate(
+        3,
+        (index) => OrbitWidget(
+            animationValue: animationValue, radius: 60 * (index + 1))).toList();
+  }
+
+  List<RotatingUserImage> planets(HomeViewModel model) {
+    return List.generate(
+        model.userData.length,
+        (index) => RotatingUserImage(
+            onTap: model.toggleMenu,
+            isOpen: model.userData[index].isOpen,
+            offset: model.calculate(
+                model.animationValue, model.userData[index].path, index),
+            data: model.userData[index].data)).toList();
   }
 }
