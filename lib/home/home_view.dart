@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:faller/home/home_viewmodel.dart';
@@ -30,29 +31,60 @@ class _HomeViewState extends State<HomeView>
         Widget? child,
       ) {
         return Scaffold(
-            body: model.isBusy
-                ? Center(child: CircularProgressIndicator())
-                : Center(
-                    child: Container(
-                    height: model.width,
-                    width: model.width,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        ...orbitWidgets(model.animationValue),
-                        ...planets(model)
-                      ],
-                    ),
-                  )));
+          backgroundColor: Color(0xff0f0c29),
+          body: model.isBusy
+              ? Center(child: CircularProgressIndicator())
+              : Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 200,
+                        width: 200,
+                        color: Colors.amber,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                              colors: [Color(0xFF6459C7), Color(0xff0f0c29)],
+                              radius: .5),
+                        ),
+                        height: model.width,
+                        width: model.width,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ...orbitWidgets(model),
+                            ...planets(model),
+                            //Handle this separately
+                            RotatingUserImage(
+                                onTap: (x) => null,
+                                isOpen: false,
+                                radius: 70,
+                                offset: Offset((model.width - 70) / 2,
+                                    (model.width - 70) / 2),
+                                data: {
+                                  'radius': (0).toString(),
+                                  'index': '-1',
+                                  'seed': '${Random().nextDouble() * 0.99}'
+                                })
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        );
       },
     );
   }
 
-  List<OrbitWidget> orbitWidgets(double animationValue) {
+  List<OrbitWidget> orbitWidgets(HomeViewModel model) {
     return List.generate(
-        3,
+        model.orbits.length,
         (index) => OrbitWidget(
-            animationValue: animationValue, radius: 60 * (index + 1))).toList();
+            animationValue: model.animationValue,
+            seed: double.parse(model.orbits[index].data['seed']!),
+            radius: model.orbits[index].radius)).toList();
   }
 
   List<RotatingUserImage> planets(HomeViewModel model) {
@@ -61,8 +93,11 @@ class _HomeViewState extends State<HomeView>
         (index) => RotatingUserImage(
             onTap: model.toggleMenu,
             isOpen: model.userData[index].isOpen,
+            radius: 40,
             offset: model.calculate(
-                model.animationValue, model.userData[index].path, index),
+                model.animationValue,
+                model.userData[index].path,
+                double.parse(model.userData[index].data['seed']!)),
             data: model.userData[index].data)).toList();
   }
 }

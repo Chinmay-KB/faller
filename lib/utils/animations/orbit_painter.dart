@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class OrbitPainter extends CustomPainter {
-  final Color color = Colors.black;
+  final Color color = Color(0xFF524F85);
   final double iconsSize = 24;
   final double radius;
 
@@ -12,7 +12,7 @@ class OrbitPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint p = Paint()
       ..color = color
-      ..strokeWidth = 1.0
+      ..strokeWidth = 2
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 

@@ -7,12 +7,14 @@ class RotatingUserImage extends StatelessWidget {
       {required this.onTap,
       required this.isOpen,
       required this.offset,
-      required this.data});
+      required this.data,
+      required this.radius});
 
   final Function(int index) onTap;
   final bool isOpen;
   final Offset offset;
   final Map<String, String> data;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class RotatingUserImage extends StatelessWidget {
         ),
         child: GestureDetector(
           onTap: () => onTap(int.parse(data['index']!)),
-          child: CircularImage(40),
+          child: CircularImage(radius),
         ),
       ),
       top: offset.dy,

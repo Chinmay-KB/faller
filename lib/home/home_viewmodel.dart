@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:faller/utils/models/orbit.dart';
 import 'package:faller/utils/models/user.dart';
 import 'package:faller/utils/widgets/orbit_widget.dart';
 import 'package:flutter/material.dart';
@@ -11,17 +12,19 @@ import 'package:flutter/services.dart';
 class HomeViewModel extends BaseViewModel {
   // bool _isOpen = false;
   late double _width;
+  late double _height;
   // late Path _path;
   late AnimationController _controller;
   late Animation _animation;
-  late List<OrbitWidget> _orbits;
+  late List<Orbit> _orbits;
   late List<User> userData;
 
   double get width => _width;
+  double get height => _height;
   // bool get isOpen => _isOpen;
   double get animationValue => _animation.value;
   AnimationController get controller => _controller;
-  List<OrbitWidget> get orbits => _orbits;
+  List<Orbit> get orbits => _orbits;
 
   toggleMenu(int index) {
     userData[index].toggleDialog();
@@ -32,9 +35,13 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  init({required double width, required TickerProvider tickerProvider}) async {
+  init(
+      {required double width,
+      required double height,
+      required TickerProvider tickerProvider}) async {
     setBusy(true);
     _width = width;
+    _height = height;
     // _path = drawPath(60);
     _controller = AnimationController(
         vsync: tickerProvider, duration: Duration(milliseconds: 5000));
@@ -45,19 +52,21 @@ class HomeViewModel extends BaseViewModel {
       });
     _controller.forward();
     initUserData();
+    initOrbitData();
     setBusy(false);
   }
 
-  Offset calculate(double value, Path path, int index) {
+  Offset calculate(double value, Path path, double seed) {
     PathMetrics pathMetrics = path.computeMetrics();
     PathMetric pathMetric = pathMetrics.elementAt(0);
-    pathMetric.extractPath(0.0 + (index + 1) / 2, pathMetric.length * value);
+    value = value + seed;
+    if (value > 1) value = value - 1;
     value = pathMetric.length * value;
     Tangent? pos = pathMetric.getTangentForOffset(value);
     return pos!.position;
   }
 
-  Path drawPath(double radius, int index) {
+  Path drawPath(double radius) {
     Path path = Path();
     final Rect rect = Rect.fromCircle(
         center: Offset((_width - 40) / 2, (_width - 40) / 2), radius: radius);
@@ -67,9 +76,24 @@ class HomeViewModel extends BaseViewModel {
 
   initUserData() {
     userData = List.generate(
+      4,
+      (index) => User(
+        path: drawPath(180),
+        data: {
+          'radius': (180).toString(),
+          'index': '$index',
+          'seed': '${Random().nextDouble() * 0.99}'
+        },
+      ),
+    ).toList();
+  }
+
+  initOrbitData() {
+    _orbits = List.generate(
         3,
-        (index) => User(
-            path: drawPath(60, index),
-            data: {'radius': (60).toString(), 'index': '$index'})).toList();
+        (index) => Orbit(radius: 60 * (index + 1), data: {
+              'level': '$index',
+              'seed': '${Random().nextDouble() * 0.99}'
+            }));
   }
 }
