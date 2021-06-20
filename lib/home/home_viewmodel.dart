@@ -16,6 +16,8 @@ class HomeViewModel extends BaseViewModel {
   // late Path _path;
   late AnimationController _controller;
   late Animation _animation;
+  late AnimationController _radiusAnimationController;
+  late Animation _radiusAnimation;
   late List<Orbit> _orbits;
   late List<User> userData;
 
@@ -25,6 +27,7 @@ class HomeViewModel extends BaseViewModel {
   double get animationValue => _animation.value;
   AnimationController get controller => _controller;
   List<Orbit> get orbits => _orbits;
+  double get radiusValue => _radiusAnimation.value;
 
   toggleMenu(int index) {
     userData[index].toggleDialog();
@@ -45,15 +48,33 @@ class HomeViewModel extends BaseViewModel {
     // _path = drawPath(60);
     _controller = AnimationController(
         vsync: tickerProvider, duration: Duration(milliseconds: 5000));
-    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
+    _animation = Tween(begin: 0.01, end: 1.0).animate(_controller)
       ..addListener(() {
         if (_controller.isCompleted) _controller.repeat();
         notifyListeners();
       });
     _controller.forward();
+    _radiusAnimationController = AnimationController(
+        value: 1,
+        upperBound: 1,
+        lowerBound: 0,
+        vsync: tickerProvider,
+        duration: Duration(milliseconds: 5000));
+    _radiusAnimation = CurvedAnimation(
+        parent: _radiusAnimationController,
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut)
+      ..addListener(() {
+        if (_radiusAnimation.isDismissed) _radiusAnimationController.forward();
+        notifyListeners();
+      });
     initUserData();
     initOrbitData();
     setBusy(false);
+  }
+
+  startBang() {
+    _radiusAnimationController.reverse();
   }
 
   Offset calculate(double value, Path path, double seed) {
@@ -69,7 +90,7 @@ class HomeViewModel extends BaseViewModel {
   Path drawPath(double radius) {
     Path path = Path();
     final Rect rect = Rect.fromCircle(
-        center: Offset((_width - 40) / 2, (_width - 40) / 2), radius: radius);
+        center: Offset((_width - 40) / 2, (height - 40) / 2), radius: radius);
     path.addOval(rect);
     return path;
   }
@@ -78,9 +99,9 @@ class HomeViewModel extends BaseViewModel {
     userData = List.generate(
       4,
       (index) => User(
-        path: drawPath(180),
+        radius: 180.0,
         data: {
-          'radius': (180).toString(),
+          'radius': (180.0).toString(),
           'index': '$index',
           'seed': '${Random().nextDouble() * 0.99}'
         },
