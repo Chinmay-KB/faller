@@ -21,9 +21,6 @@ class OrbitWidget extends StatelessWidget {
   double calculateAngle() {
     var value = animationValue + seed;
     if (value > 1) value = value - 1;
-
-    print('seed is $seed value is $value');
-
     return value;
   }
 }

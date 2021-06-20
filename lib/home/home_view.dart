@@ -85,6 +85,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
                             //Handle this separately
                             RotatingUserImage(
+                                width: model.width,
                                 onTap: (x) => null,
                                 isOpen: false,
                                 radius: 70,
@@ -93,16 +94,23 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                                 data: {
                                   'radius': (0).toString(),
                                   'index': '-1',
-                                  'seed': '${Random().nextDouble() * 0.99}'
+                                  'seed': '${Random().nextDouble() * 0.99}',
+                                  'name': 'Mr Bean',
+                                  'info': 'Teacher',
+                                  'rating': '${Random().nextInt(6)}'
                                 }),
                             Container(
-                              width: model.width,
-                              height: model.height,
+                              width: model.blastValue != 0 ? model.width : 0,
+                              height: model.blastValue != 0 ? model.height : 0,
                               decoration: BoxDecoration(
                                 gradient: RadialGradient(colors: [
-                                  Color(0xFF6459C7),
-                                  Colors.transparent
-                                ], radius: 0),
+                                  Color(0xffFFD369),
+                                  Color.fromARGB(
+                                      (255 * model.blastValue).floor(),
+                                      255,
+                                      255,
+                                      255)
+                                ], radius: 10 * model.blastValue),
                               ),
                             ),
                           ],
@@ -129,6 +137,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     return List.generate(
         model.userData.length,
         (index) => RotatingUserImage(
+            width: model.width,
             onTap: model.toggleMenu,
             isOpen: model.userData[index].isOpen,
             radius: 40,

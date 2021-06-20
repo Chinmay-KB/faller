@@ -14,20 +14,21 @@ class HomeViewModel extends BaseViewModel {
   late double _width;
   late double _height;
   // late Path _path;
-  late AnimationController _controller;
-  late Animation _animation;
-  late AnimationController _radiusAnimationController;
-  late Animation _radiusAnimation;
+  late AnimationController _controller,
+      _radiusAnimationController,
+      _blastGlowAnimationController;
+  late Animation _animation, _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
   late List<User> userData;
 
   double get width => _width;
   double get height => _height;
-  // bool get isOpen => _isOpen;
   double get animationValue => _animation.value;
+  double get radiusValue => _radiusAnimation.value;
+  double get blastValue => _blastGlowAnimation.value;
+
   AnimationController get controller => _controller;
   List<Orbit> get orbits => _orbits;
-  double get radiusValue => _radiusAnimation.value;
 
   toggleMenu(int index) {
     userData[index].toggleDialog();
@@ -57,16 +58,24 @@ class HomeViewModel extends BaseViewModel {
     _radiusAnimationController = AnimationController(
         value: 1,
         upperBound: 1,
-        lowerBound: 0,
+        lowerBound: 0.1,
         vsync: tickerProvider,
-        duration: Duration(milliseconds: 5000));
+        duration: Duration(milliseconds: 3000));
     _radiusAnimation = CurvedAnimation(
         parent: _radiusAnimationController,
         curve: Curves.easeIn,
-        reverseCurve: Curves.easeOut)
+        reverseCurve: Curves.easeInQuint)
       ..addListener(() {
         if (_radiusAnimation.isDismissed) _radiusAnimationController.forward();
         notifyListeners();
+      });
+    _blastGlowAnimationController = AnimationController(
+        vsync: tickerProvider, duration: Duration(milliseconds: 2000));
+    _blastGlowAnimation = CurvedAnimation(
+        parent: _blastGlowAnimationController, curve: Curves.easeInQuint)
+      ..addListener(() {
+        if (_blastGlowAnimation.isCompleted)
+          _blastGlowAnimationController.reverse();
       });
     initUserData();
     initOrbitData();
@@ -75,6 +84,7 @@ class HomeViewModel extends BaseViewModel {
 
   startBang() {
     _radiusAnimationController.reverse();
+    _blastGlowAnimationController.forward();
   }
 
   Offset calculate(double value, Path path, double seed) {
@@ -96,17 +106,80 @@ class HomeViewModel extends BaseViewModel {
   }
 
   initUserData() {
-    userData = List.generate(
-      4,
-      (index) => User(
-        radius: 180.0,
+    userData = [
+      User(
+        radius: 60,
         data: {
-          'radius': (180.0).toString(),
-          'index': '$index',
-          'seed': '${Random().nextDouble() * 0.99}'
+          'radius': (60).toString(),
+          'index': '0',
+          'seed': '0.3',
+          'name': 'Mr Bean',
+          'info': 'Teacher',
+          'rating': '${Random().nextInt(6)}'
         },
       ),
-    ).toList();
+      User(
+        radius: 120,
+        data: {
+          'radius': (120).toString(),
+          'index': '1',
+          'seed': '0.4',
+          'name': 'Mr Bean',
+          'info': 'Teacher',
+          'rating': '${Random().nextInt(6)}'
+        },
+      ),
+      User(
+        radius: 180,
+        data: {
+          'radius': (180).toString(),
+          'index': '2',
+          'seed': '0.8',
+          'name': 'Mr Bean',
+          'info': 'Teacher',
+          'rating': '${Random().nextInt(6)}'
+        },
+      ),
+      User(
+        radius: 180,
+        data: {
+          'radius': (180).toString(),
+          'index': '3',
+          'seed': '0.6',
+          'name': 'Mr Bean',
+          'info': 'Teacher',
+          'rating': '${Random().nextInt(6)}'
+        },
+      ),
+      User(
+        radius: 180,
+        data: {
+          'radius': (180).toString(),
+          'index': '4',
+          'seed': '0.14',
+          'name': 'Mr Bean',
+          'info': 'Teacher',
+          'rating': '${Random().nextInt(6)}'
+        },
+      ),
+    ];
+    // userData = List.generate(
+    //   6,
+    //   (index) {
+    //     final radius = 60.0 + 60 * Random().nextInt(3);
+    // return User(
+    //   radius: radius,
+    //   data: {
+    //     'radius': (radius).toString(),
+    //     'index': '$index',
+    //     'seed': '${Random().nextDouble() * 0.99}',
+    //     'name': 'Mr Bean',
+    //     'info': 'Teacher',
+    //     'rating': '${Random().nextInt(6)}'
+    //   },
+    // );
+    //   },
+    // ).toList();
   }
 
   initOrbitData() {
