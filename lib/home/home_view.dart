@@ -33,7 +33,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           width: radius,
           decoration: BoxDecoration(
               border: Border.all(color: Colors.transparent),
-              color: AppColors.PASTEL_COLORS[colorChoice],
+              color: AppColors.PASTEL_COLORS[colorChoice]
+                  .withAlpha(random.nextInt(256)),
               borderRadius: BorderRadius.all(Radius.circular(20))),
         ),
       );
@@ -74,18 +75,15 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
                         //Handle this separately
                         RotatingUserImage(
-                            width: model.width,
-                            onTap: (x) => model.toggleSun(),
-                            isOpen: model.sun.isOpen,
-                            radius: 70,
-                            offset: Offset((model.width - 70) / 2,
-                                (model.height - 70) / 2),
-                            data: {
-                              'index': '-1',
-                              'name': 'Mr Bean',
-                              'info': 'Teacher',
-                              'rating': '${Random().nextInt(6)}'
-                            }),
+                          image: model.sun.image,
+                          width: model.width,
+                          onTap: (x) => model.toggleSun(),
+                          isOpen: model.sun.isOpen,
+                          radius: 60,
+                          offset: Offset(
+                              (model.width - 60) / 2, (model.height - 60) / 2),
+                          data: model.sun.data,
+                        ),
                         Align(
                           alignment: Alignment(0, 0.8),
                           child: ElevatedButton(
@@ -149,6 +147,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     return List.generate(
         model.userData.length,
         (index) => RotatingUserImage(
+            image: model.userData[index].image,
             width: model.width,
             onTap: model.toggleMenu,
             isOpen: model.userData[index].isOpen,

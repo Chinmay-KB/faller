@@ -24,9 +24,11 @@ class HomeViewModel extends BaseViewModel {
   bool isInfoOpen = false;
   User sun = User(
     radius: 0,
+    image: AssetImage('assets/michaelscott.jpg'),
     data: {
-      'name': 'Mr Bean',
-      'info': 'Teacher',
+      'index': '-1',
+      'name': 'Michael Scott',
+      'info': 'Regional Manager',
       'rating': '${Random().nextInt(6)}'
     },
   );
@@ -81,7 +83,7 @@ class HomeViewModel extends BaseViewModel {
     _height = height;
     // _path = drawPath(60);
     _controller = AnimationController(
-        vsync: tickerProvider, duration: Duration(milliseconds: 5000));
+        vsync: tickerProvider, duration: Duration(milliseconds: 10000));
     _animation = Tween(begin: 0.01, end: 1.0).animate(_controller)
       ..addListener(() {
         if (_controller.isCompleted) _controller.repeat();
@@ -97,19 +99,21 @@ class HomeViewModel extends BaseViewModel {
     _radiusAnimation = CurvedAnimation(
         parent: _radiusAnimationController,
         curve: Curves.easeIn,
-        reverseCurve: Curves.easeInQuint)
-      ..addListener(() {
-        if (_radiusAnimation.isDismissed) _radiusAnimationController.forward();
-        notifyListeners();
-      });
+        reverseCurve: Curves.easeInQuint);
+    // Only for testing purposes
+    // ..addListener(() {
+    //   if (_radiusAnimation.isDismissed) _radiusAnimationController.forward();
+    //   notifyListeners();
+    // });
     _blastGlowAnimationController = AnimationController(
         vsync: tickerProvider, duration: Duration(milliseconds: 2000));
     _blastGlowAnimation = CurvedAnimation(
-        parent: _blastGlowAnimationController, curve: Curves.easeInQuint)
-      ..addListener(() {
-        if (_blastGlowAnimation.isCompleted)
-          _blastGlowAnimationController.reverse();
-      });
+        parent: _blastGlowAnimationController, curve: Curves.easeInQuint);
+    // Only for testing purposes
+    // ..addListener(() {
+    //   if (_blastGlowAnimation.isCompleted)
+    //     _blastGlowAnimationController.reverse();
+    // });
     initUserData();
     initOrbitData();
     setBusy(false);
@@ -149,56 +153,61 @@ class HomeViewModel extends BaseViewModel {
     userData = [
       User(
         radius: 60,
+        image: AssetImage('assets/dwight.jpg'),
         data: {
           'radius': (60).toString(),
           'index': '0',
           'seed': '0.3',
-          'name': 'Mr Bean',
-          'info': 'Teacher',
+          'name': 'Dwight',
+          'info': 'Assistant to Regional Manager',
           'rating': '${Random().nextInt(6)}'
         },
       ),
       User(
         radius: 120,
+        image: AssetImage('assets/jim.jpg'),
         data: {
           'radius': (120).toString(),
           'index': '1',
           'seed': '0.4',
-          'name': 'Mr Bean',
-          'info': 'Teacher',
+          'name': 'Jim',
+          'info': 'Salesman',
           'rating': '${Random().nextInt(6)}'
         },
       ),
       User(
         radius: 180,
+        image: AssetImage('assets/pam.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '2',
           'seed': '0.8',
-          'name': 'Mr Bean',
-          'info': 'Teacher',
+          'name': 'Pam',
+          'info': 'Receptionist',
           'rating': '${Random().nextInt(6)}'
         },
       ),
       User(
         radius: 180,
+        image: AssetImage('assets/ryan.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '3',
           'seed': '0.6',
-          'name': 'Mr Bean',
-          'info': 'Teacher',
+          'name': 'Ryan',
+          'info': 'Temp',
           'rating': '${Random().nextInt(6)}'
         },
       ),
       User(
         radius: 180,
+        image: AssetImage('assets/creed.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '4',
           'seed': '0.14',
-          'name': 'Mr Bean',
-          'info': 'Teacher',
+          'name': 'Creed',
+          'info': 'Scranton Strangler',
           'rating': '${Random().nextInt(6)}'
         },
       ),
