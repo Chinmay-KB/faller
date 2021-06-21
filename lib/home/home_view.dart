@@ -2,33 +2,31 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:faller/home/home_viewmodel.dart';
-import 'package:faller/utils/animations/orbit_painter.dart';
 import 'package:faller/utils/colors.dart';
-import 'package:faller/utils/models/user.dart';
 import 'package:faller/utils/widgets/blast_widget.dart';
-import 'package:faller/utils/widgets/circular_image.dart';
 import 'package:faller/utils/widgets/orbit_widget.dart';
 import 'package:faller/utils/widgets/polka_dot.dart';
-import 'package:faller/utils/widgets/rotating_user_image.dart';
+import 'package:faller/utils/widgets/planet_widget.dart';
 import 'package:faller/utils/widgets/search_button.dart';
 import 'package:faller/utils/widgets/sun_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stacked/stacked.dart';
 
+/// Screen for showing the solar system
 class HomeView extends StatefulWidget {
+  /// Constructor for HomeView
   const HomeView({Key? key}) : super(key: key);
   @override
   _HomeViewState createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
-  final polkadots = List.generate(
+  final List<PolkaDot> polkadots = List.generate(
     12,
-    (index) {
+    (_) {
       final random = Random();
       final radius = 10.0 + random.nextInt(10);
-      final colorChoice = random.nextInt(AppColors.PASTEL_COLORS.length);
+      final colorChoice = random.nextInt(AppColors.pastelColors.length);
       return PolkaDot(
           alignment: Alignment(
               1 - random.nextDouble() * 2, 0.6 - random.nextDouble() * 1.5),
@@ -50,12 +48,12 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         Widget? child,
       ) {
         return Scaffold(
-          backgroundColor: Color(0xff0f0c29),
+          backgroundColor: const Color(0xff0f0c29),
           body: model.isBusy
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Center(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: RadialGradient(
                           colors: [Color(0xFF6459C7), Color(0xff0f0c29)],
                           radius: .5),
@@ -91,10 +89,10 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             radius: model.orbits[index].radius * model.radiusValue)).toList();
   }
 
-  List<RotatingUserImage> planets(HomeViewModel model) {
+  List<PlanetWidget> planets(HomeViewModel model) {
     return List.generate(
         model.userData.length,
-        (index) => RotatingUserImage(
+        (index) => PlanetWidget(
             image: model.userData[index].image,
             width: model.width,
             onTap: model.toggleMenu,
@@ -102,8 +100,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             radius: 40,
             offset: model.calculate(
                 model.animationValue,
-                model.drawPath(model.userData[index].radius * model.radiusValue,
-                    model.isBang),
+                model
+                    .drawPath(model.userData[index].radius * model.radiusValue),
                 double.parse(model.userData[index].data['seed']!)),
             data: model.userData[index].data)).toList();
   }

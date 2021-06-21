@@ -2,15 +2,13 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:faller/utils/models/orbit.dart';
-import 'package:faller/utils/models/user.dart';
-import 'package:faller/utils/widgets/orbit_widget.dart';
+import 'package:faller/utils/models/planet.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:stacked/stacked.dart';
 
-import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 
+/// ViewModel for `HomeView`
 class HomeViewModel extends BaseViewModel {
   // bool _isOpen = false;
   late double _width;
@@ -21,12 +19,13 @@ class HomeViewModel extends BaseViewModel {
       _blastGlowAnimationController;
   late Animation _animation, _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
-  late List<User> userData;
-  bool isBang = false;
-  bool isInfoOpen = false;
-  User sun = User(
+  late List<Planet> _userData;
+  // ignore: prefer_final_fields
+  bool _isBang = false;
+  bool _isInfoOpen = false;
+  final _sun = Planet(
     radius: 0,
-    image: AssetImage('assets/michaelscott.jpg'),
+    image: const AssetImage('assets/michaelscott.jpg'),
     data: {
       'index': '-1',
       'name': 'Michael Scott',
@@ -35,48 +34,76 @@ class HomeViewModel extends BaseViewModel {
     },
   );
 
+  /// Screen width
   double get width => _width;
+
+  /// Screen height
   double get height => _height;
+
+  /// Animation value for rotation
   double get animationValue => _animation.value;
+
+  /// Radius value animation. Triggered on big bang.
   double get radiusValue => _radiusAnimation.value;
+
+  /// Blast radius value animation. Triggered on big bang.
   double get blastValue => _blastGlowAnimation.value;
 
-  AnimationController get controller => _controller;
+  /// Returns `true` if big bang starts
+  bool get isBang => _isBang;
+
+  /// Data related to the sun.
+  Planet get sun => _sun;
+
+  /// List of all planets
+  List<Planet> get userData => _userData;
+
+  /// List of all the orbits
   List<Orbit> get orbits => _orbits;
 
+  /// Animation controller of rotation animation.
+  AnimationController get controller => _controller;
+
+  /// Handles `onTap` event of planets.
   toggleMenu(int index) {
-    if (isInfoOpen == false) {
+    if (_isInfoOpen == false) {
       userData[index].toggleDialog();
       if (userData[index].isOpen) {
         _controller.stop();
-        isInfoOpen = true;
+        _isInfoOpen = true;
       }
       notifyListeners();
-      Future.delayed(Duration(milliseconds: 3000), () async {
+      Future.delayed(const Duration(milliseconds: 3000), () async {
         userData[index].toggleDialog();
         _controller.forward();
-        isInfoOpen = false;
+        _isInfoOpen = false;
       });
     }
   }
 
+  /// Handles onTap event of sun. Handled separately as it has different properties
+  /// TODO: Can be merged into `toggleMenu()`
   toggleSun() {
-    if (isInfoOpen == false) {
+    if (_isInfoOpen == false) {
       sun.toggleDialog();
       if (sun.isOpen) {
         _controller.stop();
-        isInfoOpen = true;
+        _isInfoOpen = true;
       }
       notifyListeners();
-      Future.delayed(Duration(milliseconds: 3000), () async {
-        sun.toggleDialog();
-        _controller.forward();
-        isInfoOpen = false;
-      });
+      Future.delayed(
+        const Duration(milliseconds: 3000),
+        () async {
+          sun.toggleDialog();
+          _controller.forward();
+          _isInfoOpen = false;
+        },
+      );
     }
   }
 
-  init(
+  /// Initialise ViewModel
+  void init(
       {required double width,
       required double height,
       required TickerProvider tickerProvider}) async {
@@ -85,7 +112,7 @@ class HomeViewModel extends BaseViewModel {
     _height = height;
     // _path = drawPath(60);
     _controller = AnimationController(
-        vsync: tickerProvider, duration: Duration(milliseconds: 10000));
+        vsync: tickerProvider, duration: const Duration(milliseconds: 10000));
     _animation = Tween(begin: 0.01, end: 1.0).animate(_controller)
       ..addListener(() {
         if (_controller.isCompleted) _controller.repeat();
@@ -97,45 +124,41 @@ class HomeViewModel extends BaseViewModel {
         upperBound: 1,
         lowerBound: 0.1,
         vsync: tickerProvider,
-        duration: Duration(milliseconds: 5000));
+        duration: const Duration(milliseconds: 5000));
     _radiusAnimation = CurvedAnimation(
         parent: _radiusAnimationController,
         curve: Curves.easeIn,
         reverseCurve: Curves.easeInQuint);
-    // Only for testing purposes
-    // ..addListener(() {
-    //   if (_radiusAnimation.isDismissed) _radiusAnimationController.forward();
-    //   notifyListeners();
-    // });
     _blastGlowAnimationController = AnimationController(
-        vsync: tickerProvider, duration: Duration(milliseconds: 4000));
+        vsync: tickerProvider, duration: const Duration(milliseconds: 4000));
     _blastGlowAnimation = CurvedAnimation(
         parent: _blastGlowAnimationController, curve: Curves.easeInExpo);
     // Only for testing purposes
-    // ..addListener(() {
-    //   if (_blastGlowAnimation.isCompleted)
-    //     _blastGlowAnimationController.reverse();
-    // });
-    initUserData();
-    initOrbitData();
+
+    initPlanetsData();
+    initOrbitsData();
     setBusy(false);
   }
 
+  /// Starts the big bang
   startBang() async {
+    // As the planets and orbits collapse, the big bang should expand, hence the
+    // reverse() for [_radiusAnimationController]
     _radiusAnimationController.reverse();
     _blastGlowAnimationController.forward();
-    isBang = true;
-    _controller.duration = Duration(milliseconds: 1000);
+    _isBang = true;
+    _controller.duration = const Duration(milliseconds: 1000);
     _controller.forward();
     if ((await Vibration.hasAmplitudeControl())!) {
-      print('Entering');
       Vibration.vibrate(
           duration: 2000,
           amplitude: (_blastGlowAnimationController.value * 255).toInt());
-    } else
+    } else {
       Vibration.vibrate(duration: 2000);
+    }
   }
 
+  /// Calculates position of a planet on the basis of the path provided
   Offset calculate(double value, Path path, double seed) {
     PathMetrics pathMetrics = path.computeMetrics();
     PathMetric pathMetric = pathMetrics.elementAt(0);
@@ -146,7 +169,8 @@ class HomeViewModel extends BaseViewModel {
     return pos!.position;
   }
 
-  Path drawPath(double radius, bool bang) {
+  /// Calculates the path of a planet depending on the radius provided
+  Path drawPath(double radius) {
     Path path = Path();
     final Rect rect = Rect.fromCircle(
         center: Offset((_width - 40) / 2, (height - 40) / 2), radius: radius);
@@ -155,23 +179,24 @@ class HomeViewModel extends BaseViewModel {
     return path;
   }
 
-  initUserData() {
-    userData = [
-      User(
+  /// Assign planets data to a list.
+  initPlanetsData() {
+    _userData = [
+      Planet(
         radius: 60,
-        image: AssetImage('assets/dwight.jpg'),
+        image: const AssetImage('assets/dwight.jpg'),
         data: {
           'radius': (60).toString(),
           'index': '0',
           'seed': '0.3',
           'name': 'Dwight',
-          'info': 'Assistant to Regional Manager',
+          'info': 'Beet farmer',
           'rating': '${Random().nextInt(6)}'
         },
       ),
-      User(
+      Planet(
         radius: 120,
-        image: AssetImage('assets/jim.jpg'),
+        image: const AssetImage('assets/jim.jpg'),
         data: {
           'radius': (120).toString(),
           'index': '1',
@@ -181,9 +206,9 @@ class HomeViewModel extends BaseViewModel {
           'rating': '${Random().nextInt(6)}'
         },
       ),
-      User(
+      Planet(
         radius: 180,
-        image: AssetImage('assets/pam.jpg'),
+        image: const AssetImage('assets/pam.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '2',
@@ -193,9 +218,9 @@ class HomeViewModel extends BaseViewModel {
           'rating': '${Random().nextInt(6)}'
         },
       ),
-      User(
+      Planet(
         radius: 180,
-        image: AssetImage('assets/ryan.jpg'),
+        image: const AssetImage('assets/ryan.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '3',
@@ -205,9 +230,9 @@ class HomeViewModel extends BaseViewModel {
           'rating': '${Random().nextInt(6)}'
         },
       ),
-      User(
+      Planet(
         radius: 180,
-        image: AssetImage('assets/creed.jpg'),
+        image: const AssetImage('assets/creed.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '4',
@@ -218,11 +243,12 @@ class HomeViewModel extends BaseViewModel {
         },
       ),
     ];
+    // Used for testing purposes.
     // userData = List.generate(
     //   6,
     //   (index) {
     //     final radius = 60.0 + 60 * Random().nextInt(3);
-    // return User(
+    // return Planet(
     //   radius: radius,
     //   data: {
     //     'radius': (radius).toString(),
@@ -237,7 +263,8 @@ class HomeViewModel extends BaseViewModel {
     // ).toList();
   }
 
-  initOrbitData() {
+  /// Assign orbits data to a list
+  initOrbitsData() {
     _orbits = List.generate(
         3,
         (index) => Orbit(radius: 60 * (index + 1), data: {

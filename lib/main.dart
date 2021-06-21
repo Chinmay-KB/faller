@@ -5,7 +5,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 
 void main() {
   runApp(
-    Portal(
+    const Portal(
       child: MaterialApp(
         home: HomeView(),
       ),

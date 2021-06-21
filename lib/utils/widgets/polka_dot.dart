@@ -3,17 +3,22 @@ import 'dart:math';
 import 'package:faller/utils/colors.dart';
 import 'package:flutter/material.dart';
 
+/// Dots shown in the background
 class PolkaDot extends StatefulWidget {
+  /// Constructor for [PolkaDot]
   const PolkaDot({
     Key? key,
-    required this.alignment,
-    required this.radius,
-    required this.colorChoice,
-  }) : super(key: key);
+    required Alignment alignment,
+    required double radius,
+    required int colorChoice,
+  })  : _alignment = alignment,
+        _colorChoice = colorChoice,
+        _radius = radius,
+        super(key: key);
 
-  final Alignment alignment;
-  final double radius;
-  final int colorChoice;
+  final Alignment _alignment;
+  final double _radius;
+  final int _colorChoice;
 
   @override
   _PoltaDotState createState() => _PoltaDotState();
@@ -25,7 +30,7 @@ class _PoltaDotState extends State<PolkaDot>
   late Animation _animation;
   @override
   void initState() {
-    _animationController = new AnimationController(
+    _animationController = AnimationController(
         vsync: this, duration: Duration(seconds: 1 + Random().nextInt(5)));
     _animationController.repeat(reverse: true);
     _animation = CurvedAnimation(
@@ -52,17 +57,17 @@ class _PoltaDotState extends State<PolkaDot>
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: widget.alignment,
+      alignment: widget._alignment,
       child: AnimatedOpacity(
         opacity: _animation.value,
-        duration: Duration(milliseconds: 1000),
+        duration: const Duration(milliseconds: 1000),
         child: Container(
-          height: widget.radius,
-          width: widget.radius,
+          height: widget._radius,
+          width: widget._radius,
           decoration: BoxDecoration(
               border: Border.all(color: Colors.transparent),
-              color: AppColors.PASTEL_COLORS[widget.colorChoice],
-              borderRadius: BorderRadius.all(Radius.circular(20))),
+              color: AppColors.pastelColors[widget._colorChoice],
+              borderRadius: const BorderRadius.all(Radius.circular(20))),
         ),
       ),
     );

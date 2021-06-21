@@ -1,21 +1,27 @@
 import 'package:faller/home/home_viewmodel.dart';
+import 'package:faller/utils/colors.dart';
 import 'package:flutter/material.dart';
 
+/// Widget showing blast of big bang
 class BlastWidget extends StatelessWidget {
-  final HomeViewModel model;
-  const BlastWidget({Key? key, required this.model}) : super(key: key);
+  final HomeViewModel _model;
+
+  /// Constructor for [BlastWidget]
+  const BlastWidget({Key? key, required HomeViewModel model})
+      : _model = model,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: model.blastValue != 0 ? model.width : 0,
-      height: model.blastValue != 0 ? model.height : 0,
+      width: _model.blastValue != 0 ? _model.width : 0,
+      height: _model.blastValue != 0 ? _model.height : 0,
       child: Center(
         child: AnimatedOpacity(
-          opacity: model.blastValue * 0.99,
-          duration: Duration(milliseconds: 2000),
+          opacity: _model.blastValue * 0.99,
+          duration: const Duration(milliseconds: 2000),
           curve: Curves.easeOutExpo,
-          child: Text(
+          child: const Text(
             'Lorem Ipsum',
             style: TextStyle(
                 color: Colors.deepOrangeAccent,
@@ -26,9 +32,9 @@ class BlastWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         gradient: RadialGradient(colors: [
-          Color(0xffFFD369),
-          Color.fromARGB((255 * model.blastValue).floor(), 255, 255, 255)
-        ], radius: 10 * model.blastValue),
+          AppColors.blastColor,
+          Color.fromARGB((255 * _model.blastValue).floor(), 255, 255, 255)
+        ], radius: 10 * _model.blastValue),
       ),
     );
   }

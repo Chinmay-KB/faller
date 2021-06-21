@@ -1,9 +1,13 @@
 import 'package:faller/home/home_viewmodel.dart';
-import 'package:faller/utils/widgets/rotating_user_image.dart';
+import 'package:faller/utils/widgets/planet_widget.dart';
 import 'package:flutter/material.dart';
 
+/// Widget to show sun, handled separately than other planets
 class SunWidget extends StatelessWidget {
+  /// Holding HomeViewModel reference
   final HomeViewModel model;
+
+  /// Constructor for [SunWidget]
   const SunWidget({
     Key? key,
     required this.model,
@@ -11,7 +15,7 @@ class SunWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RotatingUserImage(
+    return PlanetWidget(
       image: model.sun.image,
       width: model.width,
       onTap: (x) => model.toggleSun(),
