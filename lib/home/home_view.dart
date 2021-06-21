@@ -5,9 +5,13 @@ import 'package:faller/home/home_viewmodel.dart';
 import 'package:faller/utils/animations/orbit_painter.dart';
 import 'package:faller/utils/colors.dart';
 import 'package:faller/utils/models/user.dart';
+import 'package:faller/utils/widgets/blast_widget.dart';
 import 'package:faller/utils/widgets/circular_image.dart';
 import 'package:faller/utils/widgets/orbit_widget.dart';
+import 'package:faller/utils/widgets/polka_dot.dart';
 import 'package:faller/utils/widgets/rotating_user_image.dart';
+import 'package:faller/utils/widgets/search_button.dart';
+import 'package:faller/utils/widgets/sun_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stacked/stacked.dart';
@@ -25,19 +29,11 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       final random = Random();
       final radius = 10.0 + random.nextInt(10);
       final colorChoice = random.nextInt(AppColors.PASTEL_COLORS.length);
-      return Align(
-        alignment: Alignment(
-            1 - random.nextDouble() * 2, 0.6 - random.nextDouble() * 1.5),
-        child: Container(
-          height: radius,
-          width: radius,
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.transparent),
-              color: AppColors.PASTEL_COLORS[colorChoice]
-                  .withAlpha(random.nextInt(256)),
-              borderRadius: BorderRadius.all(Radius.circular(20))),
-        ),
-      );
+      return PolkaDot(
+          alignment: Alignment(
+              1 - random.nextDouble() * 2, 0.6 - random.nextDouble() * 1.5),
+          radius: radius,
+          colorChoice: colorChoice);
     },
   ).toList();
   @override
@@ -72,59 +68,11 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         ...polkadots,
                         ...orbitWidgets(model),
                         ...planets(model),
-
-                        //Handle this separately
-                        RotatingUserImage(
-                          image: model.sun.image,
-                          width: model.width,
-                          onTap: (x) => model.toggleSun(),
-                          isOpen: model.sun.isOpen,
-                          radius: 60,
-                          offset: Offset(
-                              (model.width - 60) / 2, (model.height - 60) / 2),
-                          data: model.sun.data,
+                        SunWidget(model: model),
+                        SearchButton(
+                          model: model,
                         ),
-                        Align(
-                          alignment: Alignment(0, 0.8),
-                          child: ElevatedButton(
-                            onPressed: () => model.startBang(),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 12),
-                              child: Text('Search',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                  )),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                                primary: Color(0xffE5707E)),
-                          ),
-                        ),
-                        Container(
-                          width: model.blastValue != 0 ? model.width : 0,
-                          height: model.blastValue != 0 ? model.height : 0,
-                          child: Center(
-                            child: AnimatedOpacity(
-                              opacity: model.blastValue * 0.99,
-                              duration: Duration(milliseconds: 2000),
-                              curve: Curves.easeOutExpo,
-                              child: Text(
-                                'Lorem Ipsum',
-                                style: TextStyle(
-                                    color: Colors.deepOrangeAccent,
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(colors: [
-                              Color(0xffFFD369),
-                              Color.fromARGB((255 * model.blastValue).floor(),
-                                  255, 255, 255)
-                            ], radius: 10 * model.blastValue),
-                          ),
-                        ),
+                        BlastWidget(model: model),
                       ],
                     ),
                   ),
@@ -154,8 +102,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             radius: 40,
             offset: model.calculate(
                 model.animationValue,
-                model
-                    .drawPath(model.userData[index].radius * model.radiusValue),
+                model.drawPath(model.userData[index].radius * model.radiusValue,
+                    model.isBang),
                 double.parse(model.userData[index].data['seed']!)),
             data: model.userData[index].data)).toList();
   }

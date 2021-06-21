@@ -5,6 +5,7 @@ import 'package:faller/utils/models/orbit.dart';
 import 'package:faller/utils/models/user.dart';
 import 'package:faller/utils/widgets/orbit_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:stacked/stacked.dart';
 
 import 'package:flutter/services.dart';
@@ -21,6 +22,7 @@ class HomeViewModel extends BaseViewModel {
   late Animation _animation, _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
   late List<User> userData;
+  bool isBang = false;
   bool isInfoOpen = false;
   User sun = User(
     radius: 0,
@@ -95,7 +97,7 @@ class HomeViewModel extends BaseViewModel {
         upperBound: 1,
         lowerBound: 0.1,
         vsync: tickerProvider,
-        duration: Duration(milliseconds: 3000));
+        duration: Duration(milliseconds: 5000));
     _radiusAnimation = CurvedAnimation(
         parent: _radiusAnimationController,
         curve: Curves.easeIn,
@@ -106,9 +108,9 @@ class HomeViewModel extends BaseViewModel {
     //   notifyListeners();
     // });
     _blastGlowAnimationController = AnimationController(
-        vsync: tickerProvider, duration: Duration(milliseconds: 2000));
+        vsync: tickerProvider, duration: Duration(milliseconds: 4000));
     _blastGlowAnimation = CurvedAnimation(
-        parent: _blastGlowAnimationController, curve: Curves.easeInQuint);
+        parent: _blastGlowAnimationController, curve: Curves.easeInExpo);
     // Only for testing purposes
     // ..addListener(() {
     //   if (_blastGlowAnimation.isCompleted)
@@ -122,6 +124,9 @@ class HomeViewModel extends BaseViewModel {
   startBang() async {
     _radiusAnimationController.reverse();
     _blastGlowAnimationController.forward();
+    isBang = true;
+    _controller.duration = Duration(milliseconds: 1000);
+    _controller.forward();
     if ((await Vibration.hasAmplitudeControl())!) {
       print('Entering');
       Vibration.vibrate(
@@ -141,11 +146,12 @@ class HomeViewModel extends BaseViewModel {
     return pos!.position;
   }
 
-  Path drawPath(double radius) {
+  Path drawPath(double radius, bool bang) {
     Path path = Path();
     final Rect rect = Rect.fromCircle(
         center: Offset((_width - 40) / 2, (height - 40) / 2), radius: radius);
     path.addOval(rect);
+
     return path;
   }
 
