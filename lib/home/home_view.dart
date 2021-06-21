@@ -20,14 +20,14 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   final polkadots = List.generate(
-    8,
+    12,
     (index) {
       final random = Random();
       final radius = 10.0 + random.nextInt(10);
       final colorChoice = random.nextInt(AppColors.PASTEL_COLORS.length);
       return Align(
-        alignment:
-            Alignment(random.nextDouble() - 0.5, random.nextDouble() - 0.4),
+        alignment: Alignment(
+            1 - random.nextDouble() * 2, 0.6 - random.nextDouble() * 1.5),
         child: Container(
           height: radius,
           width: radius,
@@ -53,70 +53,82 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         Widget? child,
       ) {
         return Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => model.startBang(),
-            child: Icon(Icons.add),
-          ),
           backgroundColor: Color(0xff0f0c29),
           body: model.isBusy
               ? Center(child: CircularProgressIndicator())
               : Center(
-                  child: Stack(
-                    children: [
-                      // Container(
-                      //   height: 200,
-                      //   width: 200,
-                      //   color: Colors.amber,
-                      // ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                              colors: [Color(0xFF6459C7), Color(0xff0f0c29)],
-                              radius: .5),
-                        ),
-                        height: model.height,
-                        width: model.width,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            ...polkadots,
-                            ...orbitWidgets(model),
-                            ...planets(model),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                          colors: [Color(0xFF6459C7), Color(0xff0f0c29)],
+                          radius: .5),
+                    ),
+                    height: model.height,
+                    width: model.width,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ...polkadots,
+                        ...orbitWidgets(model),
+                        ...planets(model),
 
-                            //Handle this separately
-                            RotatingUserImage(
-                                width: model.width,
-                                onTap: (x) => null,
-                                isOpen: false,
-                                radius: 70,
-                                offset: Offset((model.width - 70) / 2,
-                                    (model.height - 70) / 2),
-                                data: {
-                                  'radius': (0).toString(),
-                                  'index': '-1',
-                                  'seed': '${Random().nextDouble() * 0.99}',
-                                  'name': 'Mr Bean',
-                                  'info': 'Teacher',
-                                  'rating': '${Random().nextInt(6)}'
-                                }),
-                            Container(
-                              width: model.blastValue != 0 ? model.width : 0,
-                              height: model.blastValue != 0 ? model.height : 0,
-                              decoration: BoxDecoration(
-                                gradient: RadialGradient(colors: [
-                                  Color(0xffFFD369),
-                                  Color.fromARGB(
-                                      (255 * model.blastValue).floor(),
-                                      255,
-                                      255,
-                                      255)
-                                ], radius: 10 * model.blastValue),
+                        //Handle this separately
+                        RotatingUserImage(
+                            width: model.width,
+                            onTap: (x) => model.toggleSun(),
+                            isOpen: model.sun.isOpen,
+                            radius: 70,
+                            offset: Offset((model.width - 70) / 2,
+                                (model.height - 70) / 2),
+                            data: {
+                              'index': '-1',
+                              'name': 'Mr Bean',
+                              'info': 'Teacher',
+                              'rating': '${Random().nextInt(6)}'
+                            }),
+                        Align(
+                          alignment: Alignment(0, 0.8),
+                          child: ElevatedButton(
+                            onPressed: () => model.startBang(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 12),
+                              child: Text('Search',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                  )),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                                primary: Color(0xffE5707E)),
+                          ),
+                        ),
+                        Container(
+                          width: model.blastValue != 0 ? model.width : 0,
+                          height: model.blastValue != 0 ? model.height : 0,
+                          child: Center(
+                            child: AnimatedOpacity(
+                              opacity: model.blastValue * 0.99,
+                              duration: Duration(milliseconds: 2000),
+                              curve: Curves.easeOutExpo,
+                              child: Text(
+                                'Lorem Ipsum',
+                                style: TextStyle(
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w700),
                               ),
                             ),
-                          ],
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(colors: [
+                              Color(0xffFFD369),
+                              Color.fromARGB((255 * model.blastValue).floor(),
+                                  255, 255, 255)
+                            ], radius: 10 * model.blastValue),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
         );

@@ -21,7 +21,6 @@ class RotatingUserImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('x is ${offset.dx} y is ${offset.dy}');
     var dialogPosition = calculateDialogPosition();
     return Positioned(
       child: PortalEntry(
@@ -95,6 +94,11 @@ class RotatingUserImage extends StatelessWidget {
 
   DialogPosition calculateDialogPosition() {
     double x = offset.dx;
+    if (data['index'] == '-1')
+      return DialogPosition(
+        portalAnchor: Alignment.bottomCenter,
+        childAnchor: Alignment.topCenter,
+      );
     if (x < width / 2)
       return DialogPosition(
         portalAnchor: Alignment.centerLeft,

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 
 class HomeViewModel extends BaseViewModel {
   // bool _isOpen = false;
@@ -20,6 +21,15 @@ class HomeViewModel extends BaseViewModel {
   late Animation _animation, _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
   late List<User> userData;
+  bool isInfoOpen = false;
+  User sun = User(
+    radius: 0,
+    data: {
+      'name': 'Mr Bean',
+      'info': 'Teacher',
+      'rating': '${Random().nextInt(6)}'
+    },
+  );
 
   double get width => _width;
   double get height => _height;
@@ -31,12 +41,35 @@ class HomeViewModel extends BaseViewModel {
   List<Orbit> get orbits => _orbits;
 
   toggleMenu(int index) {
-    userData[index].toggleDialog();
-    if (userData[index].isOpen)
-      _controller.stop();
-    else
-      _controller.forward();
-    notifyListeners();
+    if (isInfoOpen == false) {
+      userData[index].toggleDialog();
+      if (userData[index].isOpen) {
+        _controller.stop();
+        isInfoOpen = true;
+      }
+      notifyListeners();
+      Future.delayed(Duration(milliseconds: 3000), () async {
+        userData[index].toggleDialog();
+        _controller.forward();
+        isInfoOpen = false;
+      });
+    }
+  }
+
+  toggleSun() {
+    if (isInfoOpen == false) {
+      sun.toggleDialog();
+      if (sun.isOpen) {
+        _controller.stop();
+        isInfoOpen = true;
+      }
+      notifyListeners();
+      Future.delayed(Duration(milliseconds: 3000), () async {
+        sun.toggleDialog();
+        _controller.forward();
+        isInfoOpen = false;
+      });
+    }
   }
 
   init(
@@ -82,9 +115,16 @@ class HomeViewModel extends BaseViewModel {
     setBusy(false);
   }
 
-  startBang() {
+  startBang() async {
     _radiusAnimationController.reverse();
     _blastGlowAnimationController.forward();
+    if ((await Vibration.hasAmplitudeControl())!) {
+      print('Entering');
+      Vibration.vibrate(
+          duration: 2000,
+          amplitude: (_blastGlowAnimationController.value * 255).toInt());
+    } else
+      Vibration.vibrate(duration: 2000);
   }
 
   Offset calculate(double value, Path path, double seed) {

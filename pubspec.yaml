@@ -27,7 +27,7 @@ dependencies:
   stacked_services: ^0.8.7
   flutter_portal: ^0.4.0
   flutter_rating_bar: ^4.0.0
-
+  vibration: ^1.7.4-nullsafety.0
 
 
   # The following adds the Cupertino Icons font to your application.
