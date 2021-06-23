@@ -1,5 +1,6 @@
 import 'package:faller/utils/models/dialog_position.dart';
 import 'package:faller/utils/widgets/circular_image.dart';
+import 'package:faller/utils/widgets/dialog_border.dart';
 import 'package:faller/utils/widgets/info_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -47,13 +48,13 @@ class PlanetWidget extends StatelessWidget {
         visible: isOpen,
         portalAnchor: dialogPosition.portalAnchor,
         childAnchor: dialogPosition.childAnchor,
-        portal: Padding(
-          padding: const EdgeInsets.all(8.0),
+        portal: Container(
+          decoration: ShapeDecoration(
+              shape: MessageBorder(offset.dx, width, data['index']!),
+              color: const Color(0xFF3B366D)),
           child: Material(
             color: const Color(0xFF3B366D),
             borderRadius: BorderRadius.circular(8),
-            shadowColor: const Color(0xFF9E9ACA),
-            elevation: 2,
             child: InfoDialog(data: data),
           ),
         ),
@@ -79,13 +80,13 @@ class PlanetWidget extends StatelessWidget {
     }
     if (x < width / 2) {
       return DialogPosition(
-        portalAnchor: Alignment.centerLeft,
-        childAnchor: Alignment.centerRight,
+        portalAnchor: Alignment.bottomLeft,
+        childAnchor: Alignment.topRight,
       );
     } else {
       return DialogPosition(
-        portalAnchor: Alignment.centerRight,
-        childAnchor: Alignment.centerLeft,
+        portalAnchor: Alignment.bottomRight,
+        childAnchor: Alignment.topLeft,
       );
     }
   }

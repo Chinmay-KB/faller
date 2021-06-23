@@ -16,7 +16,8 @@ class HomeViewModel extends BaseViewModel {
   // late Path _path;
   late AnimationController _controller,
       _radiusAnimationController,
-      _blastGlowAnimationController;
+      _blastGlowAnimationController,
+      _spinSpeedIncreaseController;
   late Animation _animation, _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
   late List<Planet> _userData;
@@ -110,10 +111,18 @@ class HomeViewModel extends BaseViewModel {
     setBusy(true);
     _width = width;
     _height = height;
-    // _path = drawPath(60);
+    _spinSpeedIncreaseController = AnimationController(
+        vsync: tickerProvider, duration: Duration(milliseconds: 3000))
+      ..addListener(() {
+        print('${_controller.duration?.inMilliseconds} in listener');
+        _controller.duration = Duration(
+            milliseconds: 1000 +
+                (9000 * (1 - _spinSpeedIncreaseController.value)).ceil());
+        _controller.forward();
+      });
     _controller = AnimationController(
-        vsync: tickerProvider, duration: const Duration(milliseconds: 10000));
-    _animation = Tween(begin: 0.01, end: 1.0).animate(_controller)
+        vsync: tickerProvider, duration: const Duration(milliseconds: 20000));
+    _animation = Tween(begin: 0.000001, end: 1.0).animate(_controller)
       ..addListener(() {
         if (_controller.isCompleted) _controller.repeat();
         notifyListeners();
@@ -122,15 +131,15 @@ class HomeViewModel extends BaseViewModel {
     _radiusAnimationController = AnimationController(
         value: 1,
         upperBound: 1,
-        lowerBound: 0.1,
+        lowerBound: 0.000001,
         vsync: tickerProvider,
-        duration: const Duration(milliseconds: 5000));
+        duration: const Duration(milliseconds: 8000));
     _radiusAnimation = CurvedAnimation(
         parent: _radiusAnimationController,
         curve: Curves.easeIn,
-        reverseCurve: Curves.easeInQuint);
+        reverseCurve: Curves.easeIn);
     _blastGlowAnimationController = AnimationController(
-        vsync: tickerProvider, duration: const Duration(milliseconds: 4000));
+        vsync: tickerProvider, duration: const Duration(milliseconds: 6000));
     _blastGlowAnimation = CurvedAnimation(
         parent: _blastGlowAnimationController, curve: Curves.easeInExpo);
     // Only for testing purposes
@@ -147,7 +156,8 @@ class HomeViewModel extends BaseViewModel {
     _radiusAnimationController.reverse();
     _blastGlowAnimationController.forward();
     _isBang = true;
-    _controller.duration = const Duration(milliseconds: 1000);
+    _spinSpeedIncreaseController.forward();
+    //_controller.duration = const Duration(milliseconds: 1000);
     _controller.forward();
     if ((await Vibration.hasAmplitudeControl())!) {
       Vibration.vibrate(
