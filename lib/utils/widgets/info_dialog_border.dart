@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
-class MessageBorder extends ShapeBorder {
-  final bool usePadding;
+/// Custom [ShapeBorder] implementaiton to show the arrow coming out of the info
+/// box pointing towards the planet.
+class InfoDialogBorder extends ShapeBorder {
+  /// Position of the parent planet absolute to the screen.
   final double dx;
+
+  /// Width of screen
   final double width;
+
+  /// Index of planet, to check if it is the sun or not
   final String index;
 
-  MessageBorder(this.dx, this.width, this.index, {this.usePadding = true});
+  /// Constructor for [InfoDialogBorder].
+  const InfoDialogBorder(this.dx, this.width, this.index);
 
   @override
-  EdgeInsetsGeometry get dimensions =>
-      EdgeInsets.only(bottom: usePadding ? 20 : 0);
+  EdgeInsetsGeometry get dimensions => const EdgeInsets.only(bottom: 20);
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path();

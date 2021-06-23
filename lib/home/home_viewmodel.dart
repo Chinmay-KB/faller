@@ -9,13 +9,28 @@ import 'package:stacked/stacked.dart';
 import 'package:vibration/vibration.dart';
 
 /// ViewModel for `HomeView`
+/// There are 4 types of animation controllers in play here.
+/// -1. `_controllers` - are a list of `AnimationController`, each one dealing with
+/// the rotation of a particular orbit and its planets.
+///
+/// -2. `_radiusanimationController' - This deals with decreasing the orbit and
+/// planet rotation radius when the big bang starts.
+///
+/// -3. `_blastGlowAnimationController` - This deals with the radius and opacity
+/// increase of the `RadialGradient` of yellow, for the bright light.
+///
+/// -4. `_spinSpeedIncreaseController` - This increases the rotation speed of
+/// planets and orbits when big bang starts. The value of this controller is
+/// passed as the duration to the `_controllers`, such that with every increase,
+/// the duration decreases and hence increase in rotation speed.
 class HomeViewModel extends BaseViewModel {
   // bool _isOpen = false;
   late double _width;
   late double _height;
   // late Path _path;
   late List<AnimationController> _controllers;
-  final orbitsNo = 3;
+  // Number of orbits. Used for creating the rotation animation controllers
+  final _orbitsNo = 3;
   late AnimationController _radiusAnimationController,
       _blastGlowAnimationController,
       _spinSpeedIncreaseController;
@@ -27,6 +42,8 @@ class HomeViewModel extends BaseViewModel {
   bool _isInfoOpen = false;
   final _sun = Planet(
     radius: 0,
+    seed: 0,
+    orbit: -1,
     image: const AssetImage('assets/michaelscott.jpg'),
     data: {
       'index': '-1',
@@ -71,13 +88,14 @@ class HomeViewModel extends BaseViewModel {
     if (_isInfoOpen == false) {
       userData[index].toggleDialog();
       if (userData[index].isOpen) {
-        _controllers[int.parse(userData[index].data['orbit']!)].stop();
+        _controllers[userData[index].orbit].stop();
         _isInfoOpen = true;
       }
       notifyListeners();
+      // Restart rotation after 3 seconds
       Future.delayed(const Duration(milliseconds: 3000), () async {
         userData[index].toggleDialog();
-        _controllers[int.parse(userData[index].data['orbit']!)].forward();
+        _controllers[userData[index].orbit].forward();
         _isInfoOpen = false;
       });
     }
@@ -92,13 +110,13 @@ class HomeViewModel extends BaseViewModel {
         _isInfoOpen = true;
       }
       notifyListeners();
-      // Future.delayed(
-      //   const Duration(milliseconds: 3000),
-      //   () async {
-      //     sun.toggleDialog();
-      //     _isInfoOpen = false;
-      //   },
-      // );
+      Future.delayed(
+        const Duration(milliseconds: 3000),
+        () async {
+          sun.toggleDialog();
+          _isInfoOpen = false;
+        },
+      );
     }
   }
 
@@ -111,7 +129,8 @@ class HomeViewModel extends BaseViewModel {
     _width = width;
     _height = height;
     _spinSpeedIncreaseController = AnimationController(
-        vsync: tickerProvider, duration: Duration(milliseconds: 3000))
+        vsync: tickerProvider, duration: const Duration(milliseconds: 3000))
+      // Not sure if this is a proper way to do this/
       ..addListener(
         () {
           _controllers.forEach(
@@ -125,7 +144,7 @@ class HomeViewModel extends BaseViewModel {
         },
       );
     _controllers = List.generate(
-      orbitsNo,
+      _orbitsNo,
       (index) => AnimationController(
         vsync: tickerProvider,
         duration: const Duration(milliseconds: 20000),
@@ -178,6 +197,8 @@ class HomeViewModel extends BaseViewModel {
   }
 
   /// Calculates position of a planet on the basis of the path provided
+  // Throws an error when value passed is `0`. Hence the lower bounds of some
+  // animations are `0.00001` rather than `0`.
   Offset calculate(double value, Path path, double seed) {
     PathMetrics pathMetrics = path.computeMetrics();
     PathMetric pathMetric = pathMetrics.elementAt(0);
@@ -204,11 +225,11 @@ class HomeViewModel extends BaseViewModel {
       Planet(
         radius: 60,
         image: const AssetImage('assets/dwight.jpg'),
+        orbit: 0,
+        seed: 0.3,
         data: {
           'radius': (60).toString(),
           'index': '0',
-          'orbit': '0',
-          'seed': '0.3',
           'name': 'Dwight',
           'info': 'Beet farmer',
           'rating': '${Random().nextInt(6)}'
@@ -216,12 +237,12 @@ class HomeViewModel extends BaseViewModel {
       ),
       Planet(
         radius: 120,
+        orbit: 1,
+        seed: 0.4,
         image: const AssetImage('assets/jim.jpg'),
         data: {
           'radius': (120).toString(),
           'index': '1',
-          'orbit': '1',
-          'seed': '0.4',
           'name': 'Jim',
           'info': 'Salesman',
           'rating': '${Random().nextInt(6)}'
@@ -229,12 +250,12 @@ class HomeViewModel extends BaseViewModel {
       ),
       Planet(
         radius: 180,
+        orbit: 2,
+        seed: 0.8,
         image: const AssetImage('assets/pam.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '2',
-          'seed': '0.8',
-          'orbit': '2',
           'name': 'Pam',
           'info': 'Receptionist',
           'rating': '${Random().nextInt(6)}'
@@ -242,12 +263,13 @@ class HomeViewModel extends BaseViewModel {
       ),
       Planet(
         radius: 180,
+        seed: 0.6,
         image: const AssetImage('assets/ryan.jpg'),
+        orbit: 2,
         data: {
           'radius': (180).toString(),
           'index': '3',
           'seed': '0.6',
-          'orbit': '2',
           'name': 'Ryan',
           'info': 'Temp',
           'rating': '${Random().nextInt(6)}'
@@ -255,12 +277,12 @@ class HomeViewModel extends BaseViewModel {
       ),
       Planet(
         radius: 180,
+        orbit: 2,
+        seed: 0.14,
         image: const AssetImage('assets/creed.jpg'),
         data: {
           'radius': (180).toString(),
           'index': '4',
-          'seed': '0.14',
-          'orbit': '2',
           'name': 'Creed',
           'info': 'Scranton Strangler',
           'rating': '${Random().nextInt(6)}'

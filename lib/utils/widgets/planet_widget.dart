@@ -1,6 +1,6 @@
 import 'package:faller/utils/models/dialog_position.dart';
 import 'package:faller/utils/widgets/circular_image.dart';
-import 'package:faller/utils/widgets/dialog_border.dart';
+import 'package:faller/utils/widgets/info_dialog_border.dart';
 import 'package:faller/utils/widgets/info_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -50,7 +50,7 @@ class PlanetWidget extends StatelessWidget {
         childAnchor: dialogPosition.childAnchor,
         portal: Container(
           decoration: ShapeDecoration(
-              shape: MessageBorder(offset.dx, width, data['index']!),
+              shape: InfoDialogBorder(offset.dx, width, data['index']!),
               color: const Color(0xFF3B366D)),
           child: Material(
             color: const Color(0xFF3B366D),

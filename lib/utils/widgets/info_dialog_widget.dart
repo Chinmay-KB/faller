@@ -51,7 +51,7 @@ class InfoDialog extends StatelessWidget {
                 color: Colors.amberAccent,
               ),
               itemSize: 18,
-              onRatingUpdate: (_) => null,
+              onRatingUpdate: (_) => {},
               ignoreGestures: true,
               itemCount: 5,
               initialRating: int.parse(data['rating']!) * 1.0,

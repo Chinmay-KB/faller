@@ -3,17 +3,23 @@ import 'package:flutter/material.dart';
 /// PODO for User
 class Planet {
   bool _isOpen = false;
+  final int _orbit;
   final double _radius;
   final Map<String?, String?> _data;
   final ImageProvider _image;
+  final double _seed;
 
   /// Constructor for [Planet]
   Planet(
       {required Map<String?, String?> data,
       required double radius,
-      required ImageProvider image})
+      required ImageProvider image,
+      required double seed,
+      required int orbit})
       : _radius = radius,
         _data = data,
+        _orbit = orbit,
+        _seed = seed,
         _image = image;
 
   /// Toggles whether info dialog is open for the planet or not
@@ -30,4 +36,10 @@ class Planet {
 
   /// Get whether info dialog for the planet is open or not. `false` by default.
   bool get isOpen => _isOpen;
+
+  /// Get orbit level in which the planet is placed
+  int get orbit => _orbit;
+
+  /// Get seed value for randomising planet position
+  double get seed => _seed;
 }
