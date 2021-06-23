@@ -14,11 +14,12 @@ class HomeViewModel extends BaseViewModel {
   late double _width;
   late double _height;
   // late Path _path;
-  late AnimationController _controller,
-      _radiusAnimationController,
+  late List<AnimationController> _controllers;
+  final orbitsNo = 3;
+  late AnimationController _radiusAnimationController,
       _blastGlowAnimationController,
       _spinSpeedIncreaseController;
-  late Animation _animation, _radiusAnimation, _blastGlowAnimation;
+  late Animation _radiusAnimation, _blastGlowAnimation;
   late List<Orbit> _orbits;
   late List<Planet> _userData;
   // ignore: prefer_final_fields
@@ -42,7 +43,7 @@ class HomeViewModel extends BaseViewModel {
   double get height => _height;
 
   /// Animation value for rotation
-  double get animationValue => _animation.value;
+  double animationValue(index) => _controllers[index].value;
 
   /// Radius value animation. Triggered on big bang.
   double get radiusValue => _radiusAnimation.value;
@@ -63,20 +64,20 @@ class HomeViewModel extends BaseViewModel {
   List<Orbit> get orbits => _orbits;
 
   /// Animation controller of rotation animation.
-  AnimationController get controller => _controller;
+  AnimationController controller(index) => _controllers[index];
 
   /// Handles `onTap` event of planets.
   toggleMenu(int index) {
     if (_isInfoOpen == false) {
       userData[index].toggleDialog();
       if (userData[index].isOpen) {
-        _controller.stop();
+        _controllers[int.parse(userData[index].data['orbit']!)].stop();
         _isInfoOpen = true;
       }
       notifyListeners();
       Future.delayed(const Duration(milliseconds: 3000), () async {
         userData[index].toggleDialog();
-        _controller.forward();
+        _controllers[int.parse(userData[index].data['orbit']!)].forward();
         _isInfoOpen = false;
       });
     }
@@ -88,18 +89,16 @@ class HomeViewModel extends BaseViewModel {
     if (_isInfoOpen == false) {
       sun.toggleDialog();
       if (sun.isOpen) {
-        _controller.stop();
         _isInfoOpen = true;
       }
       notifyListeners();
-      Future.delayed(
-        const Duration(milliseconds: 3000),
-        () async {
-          sun.toggleDialog();
-          _controller.forward();
-          _isInfoOpen = false;
-        },
-      );
+      // Future.delayed(
+      //   const Duration(milliseconds: 3000),
+      //   () async {
+      //     sun.toggleDialog();
+      //     _isInfoOpen = false;
+      //   },
+      // );
     }
   }
 
@@ -113,21 +112,33 @@ class HomeViewModel extends BaseViewModel {
     _height = height;
     _spinSpeedIncreaseController = AnimationController(
         vsync: tickerProvider, duration: Duration(milliseconds: 3000))
-      ..addListener(() {
-        print('${_controller.duration?.inMilliseconds} in listener');
-        _controller.duration = Duration(
-            milliseconds: 1000 +
-                (9000 * (1 - _spinSpeedIncreaseController.value)).ceil());
-        _controller.forward();
-      });
-    _controller = AnimationController(
-        vsync: tickerProvider, duration: const Duration(milliseconds: 20000));
-    _animation = Tween(begin: 0.000001, end: 1.0).animate(_controller)
-      ..addListener(() {
-        if (_controller.isCompleted) _controller.repeat();
+      ..addListener(
+        () {
+          _controllers.forEach(
+            (_controller) {
+              _controller.duration = Duration(
+                  milliseconds: 1000 +
+                      (9000 * (1 - _spinSpeedIncreaseController.value)).ceil());
+              _controller.forward();
+            },
+          );
+        },
+      );
+    _controllers = List.generate(
+      orbitsNo,
+      (index) => AnimationController(
+        vsync: tickerProvider,
+        duration: const Duration(milliseconds: 20000),
+      ),
+    ).toList();
+    _controllers.forEach((element) {
+      element.addListener(() {
+        if (element.isCompleted) element.repeat();
         notifyListeners();
       });
-    _controller.forward();
+      element.forward();
+    });
+
     _radiusAnimationController = AnimationController(
         value: 1,
         upperBound: 1,
@@ -157,8 +168,6 @@ class HomeViewModel extends BaseViewModel {
     _blastGlowAnimationController.forward();
     _isBang = true;
     _spinSpeedIncreaseController.forward();
-    //_controller.duration = const Duration(milliseconds: 1000);
-    _controller.forward();
     if ((await Vibration.hasAmplitudeControl())!) {
       Vibration.vibrate(
           duration: 2000,
@@ -198,6 +207,7 @@ class HomeViewModel extends BaseViewModel {
         data: {
           'radius': (60).toString(),
           'index': '0',
+          'orbit': '0',
           'seed': '0.3',
           'name': 'Dwight',
           'info': 'Beet farmer',
@@ -210,6 +220,7 @@ class HomeViewModel extends BaseViewModel {
         data: {
           'radius': (120).toString(),
           'index': '1',
+          'orbit': '1',
           'seed': '0.4',
           'name': 'Jim',
           'info': 'Salesman',
@@ -223,6 +234,7 @@ class HomeViewModel extends BaseViewModel {
           'radius': (180).toString(),
           'index': '2',
           'seed': '0.8',
+          'orbit': '2',
           'name': 'Pam',
           'info': 'Receptionist',
           'rating': '${Random().nextInt(6)}'
@@ -235,6 +247,7 @@ class HomeViewModel extends BaseViewModel {
           'radius': (180).toString(),
           'index': '3',
           'seed': '0.6',
+          'orbit': '2',
           'name': 'Ryan',
           'info': 'Temp',
           'rating': '${Random().nextInt(6)}'
@@ -247,6 +260,7 @@ class HomeViewModel extends BaseViewModel {
           'radius': (180).toString(),
           'index': '4',
           'seed': '0.14',
+          'orbit': '2',
           'name': 'Creed',
           'info': 'Scranton Strangler',
           'rating': '${Random().nextInt(6)}'

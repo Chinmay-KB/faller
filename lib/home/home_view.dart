@@ -84,7 +84,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     return List.generate(
         model.orbits.length,
         (index) => OrbitWidget(
-            animationValue: model.animationValue,
+            animationValue: model.animationValue(index),
             seed: double.parse(model.orbits[index].data['seed']!),
             radius: model.orbits[index].radius * model.radiusValue)).toList();
   }
@@ -99,7 +99,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             isOpen: model.userData[index].isOpen,
             radius: 40,
             offset: model.calculate(
-                model.animationValue,
+                model.animationValue(
+                  int.parse(model.userData[index].data['orbit']!),
+                ),
                 model
                     .drawPath(model.userData[index].radius * model.radiusValue),
                 double.parse(model.userData[index].data['seed']!)),

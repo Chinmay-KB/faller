@@ -19,13 +19,8 @@ class MessageBorder extends ShapeBorder {
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     // Dialog in center
     if (index == '-1') {
-      print('firing center');
-      rect = Rect.fromPoints(
-          rect.topLeft, rect.bottomRight - Offset(rect.bottom / 2 - 10, 20));
       return Path()
-        ..addRRect(
-            RRect.fromRectAndRadius(rect, Radius.circular(rect.height / 2)))
-        ..moveTo(rect.bottomCenter.dx, rect.bottomCenter.dy)
+        ..moveTo(rect.bottomCenter.dx - 20, rect.bottomCenter.dy - 20)
         ..relativeLineTo(20, 20)
         ..relativeLineTo(20, -20)
         ..close();
